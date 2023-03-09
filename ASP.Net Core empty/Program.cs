@@ -2,7 +2,6 @@ var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
@@ -15,13 +14,31 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 
 app.UseRouting();
 
-//Добавляем компонент для логирования запросов с использованием метода Use.
+/* //Используем метод Use, чтобы запрос передавался дальше по конвейеру
+app.Use(async (context, next) =>
+{
+   // Строка для публикации в лог
+   string logMessage = $"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}{Environment.NewLine}";
+  
+   // Путь до лога (опять-таки, используем свойства IWebHostEnvironment)
+   string logFilePath = Path.Combine(app.Environment.ContentRootPath, "Logs", "RequestLog.txt");
+  
+   // Используем асинхронную запись в файл
+   await File.AppendAllTextAsync(logFilePath, logMessage);
+  
+   await next.Invoke();
+}); */
+
+// Подключаем логирвоание с использованием ПО промежуточного слоя
+app.UseMiddleware<LoggingMiddleware>();
+
+/* //Добавляем компонент для логирования запросов с использованием метода Use.
 app.Use(async (context, next) =>
 {
     // Для логирования данных о запросе используем свойства объекта HttpContext
     Console.WriteLine($"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}");
     await next.Invoke();
-});
+}); */
 
 
 // Сначала используем метод Use, чтобы не прерывать ковейер
@@ -46,38 +63,41 @@ app.UseEndpoints(endpoints =>
 app.Map("/about", About);
 app.Map("/config", Config);
 
+// Обработчик для ошибки "страница не найдена"
+app.Run(async (context) =>
+{
+    await context.Response.WriteAsync($"Page not found");
+});
 
 /// <summary>
 ///  Обработчик для страницы About
 /// </summary>
-static void About(WebApplication app)
+static void About(WebApplication app, IWebHostEnvironment env)
 {
    app.Run(async context =>
    {
-       await context.Response.WriteAsync($"{app.Environment.ApplicationName} - ASP.Net Core tutorial project");
+       await context.Response.WriteAsync($"{env.ApplicationName} - ASP.Net Core tutorial project");
    });
 }
  
 /// <summary>
 ///  Обработчик для главной страницы
 /// </summary>
-static void Config(WebApplication app)
+static void Config(IApplicationBuilder app, IWebHostEnvironment env)
 {
    app.Run(async context =>
    {
-       await context.Response.WriteAsync($"App name: {app.Environment.ApplicationName}. App running configuration: {app.Environment.EnvironmentName}");
+       await context.Response.WriteAsync($"App name: {env.ApplicationName}. App running configuration: {env.EnvironmentName}");
    });
 }
 
 
 
-app.MapGet("/", () => $"Welcome to the {app.Environment.ApplicationName}!");
 
-// Обработчик для ошибки "страница не найдена"
-app.Run(async (context) =>
-{
-    await context.Response.WriteAsync($"Page not found");
-});
+
+//app.MapGet("/", () => $"Welcome to the {app.Environment.ApplicationName}!");
+
+
 
 
 app.Run();
