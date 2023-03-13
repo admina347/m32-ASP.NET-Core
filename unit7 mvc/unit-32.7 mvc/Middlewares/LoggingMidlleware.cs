@@ -1,6 +1,13 @@
+using unit_32._7_mvc.Models.Db;
+using unit_32._7_mvc.Repositories;
+
 public class LoggingMiddleware
 {
     private readonly RequestDelegate _next;
+    private IRequestRepository _requestRepository;
+
+    /* //Заполним модель
+        Request newRequest = new Request(); */
 
     /// <summary>
     ///  Middleware-компонент должен иметь конструктор, принимающий RequestDelegate
@@ -8,6 +15,7 @@ public class LoggingMiddleware
     public LoggingMiddleware(RequestDelegate next)
     {
         _next = next;
+        //_requestRepository = requestRepository;
     }
 
     private void LogConsole(HttpContext context)
@@ -31,13 +39,40 @@ public class LoggingMiddleware
     /// <summary>
     ///  Необходимо реализовать метод Invoke  или InvokeAsync
     /// </summary>
-    public async Task InvokeAsync(HttpContext context)
+    private async Task LogToDbAsync(HttpContext context)
     {
+        //Заполним модель
+        Request newRequest = new Request()
+        {
+            Id = Guid.NewGuid(),
+            Date = DateTime.Now,
+            Url = $"http://{context.Request.Host.Value + context.Request.Path}"
+        };
+        
+            /* newRequest.Id = Guid.NewGuid();
+            newRequest.Date = DateTime.Now;
+            newRequest.Url = $"http://{context.Request.Host.Value + context.Request.Path}"; */
+        
+        //Запись в БД
+        if (newRequest != null && _requestRepository != null)
+        {
+            await _requestRepository.AddRequestToDbAsync(newRequest);
+        }        
+    }
+
+    /// <summary>
+    ///  Необходимо реализовать метод Invoke  или InvokeAsync
+    /// </summary>
+    public async Task InvokeAsync(HttpContext context, IRequestRepository requestRepository)
+    {
+        //конструктор
+        _requestRepository = requestRepository;
         LogConsole(context);
         await LogFile(context);
+        //
+        await LogToDbAsync(context);
 
         // Передача запроса далее по конвейеру
         await _next.Invoke(context);
     }
-
 }

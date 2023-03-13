@@ -16,12 +16,14 @@ builder.Services.AddDbContext<BlogContext>(options =>
 
 // регистрация сервиса репозитория для взаимодействия с базой данных
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
-
+//Подключаем репозитоий для логов
+builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 
 var app = builder.Build();
 
 // Подключаем логирвоание с использованием ПО промежуточного слоя
 app.UseMiddleware<LoggingMiddleware>();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
