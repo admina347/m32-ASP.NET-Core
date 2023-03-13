@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/unit-32.7 mvc.props" />
-</Project>
