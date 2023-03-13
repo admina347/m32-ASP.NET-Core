@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using unit_32._7_mvc.Models.Db;
 
 namespace unit_32._7_mvc.Repositories
@@ -17,6 +18,12 @@ namespace unit_32._7_mvc.Repositories
         {
             await _context.Requests.AddAsync(req);
             await _context.SaveChangesAsync();
+        }
+        //Get all requests
+        public async Task<Request[]> GetAllRequestsAsync()
+        {
+            // Получим всех активных пользователей
+            return await _context.Requests.OrderByDescending(r => r.Date).ToArrayAsync();
         }
     }
 }
