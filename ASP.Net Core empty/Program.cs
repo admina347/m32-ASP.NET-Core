@@ -14,6 +14,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 
 app.UseRouting();
 
+// Поддержка статических файлов
+app.UseStaticFiles();
+
+//builder.WebHost.UseWebRoot("Views");
+
 /* //Используем метод Use, чтобы запрос передавался дальше по конвейеру
 app.Use(async (context, next) =>
 {
@@ -60,44 +65,27 @@ app.UseEndpoints(endpoints =>
 });
 
 // Все прочие страницы имеют отдельные обработчики
-app.Map("/about", About);
-app.Map("/config", Config);
+//app.Map("/about", About);
+app.Map("/about", async (context) =>
+{
+    await context.Response.WriteAsync($"{app.Environment.ApplicationName} - ASP.Net Core tutorial project");
+});
+app.Map("/config", async (context) =>
+{
+    await context.Response.WriteAsync($"App name: {app.Environment.ApplicationName}. App running configuration: {app.Environment.EnvironmentName}");
+});
+
 
 // Обработчик для ошибки "страница не найдена"
 app.Run(async (context) =>
 {
+    int zero = 0;
+    int result = 4 / zero;
     await context.Response.WriteAsync($"Page not found");
 });
 
-/// <summary>
-///  Обработчик для страницы About
-/// </summary>
-static void About(WebApplication app, IWebHostEnvironment env)
-{
-   app.Run(async context =>
-   {
-       await context.Response.WriteAsync($"{env.ApplicationName} - ASP.Net Core tutorial project");
-   });
-}
- 
-/// <summary>
-///  Обработчик для главной страницы
-/// </summary>
-static void Config(IApplicationBuilder app, IWebHostEnvironment env)
-{
-   app.Run(async context =>
-   {
-       await context.Response.WriteAsync($"App name: {env.ApplicationName}. App running configuration: {env.EnvironmentName}");
-   });
-}
-
-
-
-
+Console.WriteLine($"Launching project from: {app.Environment.ContentRootPath}");
 
 //app.MapGet("/", () => $"Welcome to the {app.Environment.ApplicationName}!");
-
-
-
 
 app.Run();

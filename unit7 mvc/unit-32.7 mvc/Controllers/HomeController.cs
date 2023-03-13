@@ -25,7 +25,7 @@ public class HomeController : Controller
     } */
     public async Task<IActionResult> Index()
     {
-        // Добавим создание нового пользователя
+        /* // Добавим создание нового пользователя
         var newUser = new User()
         {
             Id = Guid.NewGuid(),
@@ -38,7 +38,7 @@ public class HomeController : Controller
         await _repo.AddUser(newUser);
 
         // Выведем результат
-        Console.WriteLine($"User with id {newUser.Id}, named {newUser.FirstName} was successfully added on {newUser.JoinDate}");
+        Console.WriteLine($"User with id {newUser.Id}, named {newUser.FirstName} was successfully added on {newUser.JoinDate}"); */
 
         return View();
     }
@@ -48,11 +48,11 @@ public class HomeController : Controller
         return View();
     }
     //users list
-    public async Task<IActionResult> Authors()
+    /* public async Task<IActionResult> Authors()
     {
         var authors = await _repo.GetUsers();
         return View(authors);
-    }
+    } */
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

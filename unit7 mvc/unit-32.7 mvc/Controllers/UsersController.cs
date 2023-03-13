@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using unit_32._7_mvc.Models.Db;
 using unit_32._7_mvc.Repositories;
 
 namespace unit_32._7_mvc.Controllers
@@ -20,6 +21,21 @@ namespace unit_32._7_mvc.Controllers
             var authors = await _repo.GetUsers();
             return View(authors);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(User newUser)
+        {
+            await _repo.AddUser(newUser);
+            return View(newUser);
+        }
+
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
